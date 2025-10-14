@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": ["*://www.linkedin.com/*"],
-      "js": ["supabase.js", "content.js"],
+      "js": ["supabase.js", "content-refactored.js"],
       "run_at": "document_end"
     }
   ],
