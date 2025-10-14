@@ -52,7 +52,9 @@ function extractLinkedInProfile() {
         'a[data-test-app-aware-link][href*="followers"] strong',
         '.pvs-header__optional-link a[href*="followers"] strong',
         'a[href*="followers"] span',
-        '.pv-top-card__connections a[href*="followers"]'
+        '.pv-top-card__connections a[href*="followers"]',
+        '.pvs-entity__caption-wrapper span[aria-hidden="true"]',
+        '.pvs-header__optional-link span[aria-hidden="true"]'
     ];
 
     for (const selector of followersSelectors) {
@@ -68,6 +70,7 @@ function extractLinkedInProfile() {
 
     // Si pas trouvé, chercher dans tout le document
     if (!userInfo.nombreAbonnes) {
+        // Recherche dans tous les liens avec "followers"
         const allLinks = document.querySelectorAll('a[href*="followers"]');
         for (const link of allLinks) {
             const text = link.textContent.trim();
@@ -76,10 +79,36 @@ function extractLinkedInProfile() {
                 break;
             }
         }
+
+        // Recherche dans tous les spans contenant "abonnés"
+        if (!userInfo.nombreAbonnes) {
+            const allSpans = document.querySelectorAll('span[aria-hidden="true"]');
+            for (const span of allSpans) {
+                const text = span.textContent.trim();
+                if (text.includes('abonnés') || text.includes('followers')) {
+                    userInfo.nombreAbonnes = text;
+                    break;
+                }
+            }
+        }
+
+        // Recherche dans les paragraphes
+        if (!userInfo.nombreAbonnes) {
+            const allParagraphs = document.querySelectorAll('p');
+            for (const p of allParagraphs) {
+                const text = p.textContent.trim();
+                if (text.includes('abonnés') || text.includes('followers')) {
+                    userInfo.nombreAbonnes = text;
+                    break;
+                }
+            }
+        }
     }
 
     // Extraction des relations - Sélecteurs améliorés
     const connectionsSelectors = [
+        'a[href*="connectionOf"] .t-bold',
+        'a[href*="network"] .t-bold',
         'a[href*="connections"] .t-bold',
         'a[href="/mynetwork/invite-connect/connections/"] .t-bold',
         '.text-body-small a[href*="connections"] .t-bold',
@@ -92,15 +121,20 @@ function extractLinkedInProfile() {
         if (element) {
             const text = element.textContent.trim();
             const parentText = element.parentElement ? element.parentElement.textContent.trim() : '';
+            const grandParentText = element.parentElement && element.parentElement.parentElement ?
+                element.parentElement.parentElement.textContent.trim() : '';
 
-            if (text.match(/^\d+$/) || parentText.includes('relations') || parentText.includes('connections')) {
-                if (parentText.includes('relations')) {
-                    userInfo.nombreRelations = parentText;
-                } else if (text.match(/^\d+$/)) {
+            // Vérifier si c'est un nombre seul dans un élément .t-bold
+            if (text.match(/^\d+$/)) {
+                // Vérifier le contexte parent pour "relations"
+                if (parentText.includes('relations') || grandParentText.includes('relations')) {
                     userInfo.nombreRelations = text + ' relations';
-                } else {
-                    userInfo.nombreRelations = text;
+                    break;
                 }
+            }
+            // Vérifier si le texte complet contient déjà "relations"
+            else if (text.includes('relations') || parentText.includes('relations')) {
+                userInfo.nombreRelations = parentText.includes('relations') ? parentText : text;
                 break;
             }
         }
@@ -108,12 +142,37 @@ function extractLinkedInProfile() {
 
     // Si pas trouvé, chercher dans tout le document
     if (!userInfo.nombreRelations) {
+        // Recherche dans tous les liens avec "connections"
         const allLinks = document.querySelectorAll('a[href*="connections"]');
         for (const link of allLinks) {
             const text = link.textContent.trim();
             if (text.includes('relations') || text.includes('connections')) {
                 userInfo.nombreRelations = text;
                 break;
+            }
+        }
+
+        // Recherche dans tous les spans contenant "relations"
+        if (!userInfo.nombreRelations) {
+            const allSpans = document.querySelectorAll('span[aria-hidden="true"]');
+            for (const span of allSpans) {
+                const text = span.textContent.trim();
+                if (text.includes('relations') || text.includes('connections')) {
+                    userInfo.nombreRelations = text;
+                    break;
+                }
+            }
+        }
+
+        // Recherche dans les paragraphes
+        if (!userInfo.nombreRelations) {
+            const allParagraphs = document.querySelectorAll('p');
+            for (const p of allParagraphs) {
+                const text = p.textContent.trim();
+                if (text.includes('relations') || text.includes('connections')) {
+                    userInfo.nombreRelations = text;
+                    break;
+                }
             }
         }
     }
@@ -505,7 +564,7 @@ function extractLinkedInProfile() {
     return userInfo;
 }
 
-async function getLinkedInUserInfo() {
+async function getLinkedInUserInfo(saveToSupabase = false) {
     const userInfo = extractLinkedInProfile();
 
     window.linkedInUserData = {
@@ -516,8 +575,8 @@ async function getLinkedInUserInfo() {
 
     console.log('✅ Extraction terminée. Données complètes:', userInfo);
 
-    // Sauvegarder dans Supabase
-    if (typeof saveLinkedInProfile === 'function') {
+    // Sauvegarder dans Supabase seulement si demandé explicitement
+    if (saveToSupabase && typeof saveLinkedInProfile === 'function') {
         try {
             const saveResult = await saveLinkedInProfile(userInfo);
             if (saveResult.success) {
@@ -528,8 +587,6 @@ async function getLinkedInUserInfo() {
         } catch (error) {
             console.error('❌ Erreur lors de la sauvegarde:', error);
         }
-    } else {
-        console.log('⚠️ Fonction de sauvegarde Supabase non disponible');
     }
 
     return userInfo;
@@ -555,9 +612,9 @@ observer.observe(document.body, {
 // Gestion des messages du popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.action === 'extractProfile') {
-        // Extraire le profil immédiatement
-        getLinkedInUserInfo().then(() => {
-            sendResponse({ success: true, message: 'Profil extrait avec succès' });
+        // Extraire le profil ET sauvegarder dans Supabase
+        getLinkedInUserInfo(true).then(() => {
+            sendResponse({ success: true, message: 'Profil extrait et sauvegardé avec succès' });
         }).catch(error => {
             sendResponse({ success: false, error: error.message });
         });

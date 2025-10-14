@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 if (response && response.success) {
-                    updateStatus('Profil extrait avec succès!', 'success');
+                    updateStatus('Profil extrait et sauvegardé!', 'success');
                 } else {
                     updateStatus('Erreur lors de l\'extraction', 'error');
                 }
