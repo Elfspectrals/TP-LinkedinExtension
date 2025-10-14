@@ -505,7 +505,7 @@ function extractLinkedInProfile() {
     return userInfo;
 }
 
-function getLinkedInUserInfo() {
+async function getLinkedInUserInfo() {
     const userInfo = extractLinkedInProfile();
 
     window.linkedInUserData = {
@@ -515,6 +515,22 @@ function getLinkedInUserInfo() {
     };
 
     console.log('✅ Extraction terminée. Données complètes:', userInfo);
+
+    // Sauvegarder dans Supabase
+    if (typeof saveLinkedInProfile === 'function') {
+        try {
+            const saveResult = await saveLinkedInProfile(userInfo);
+            if (saveResult.success) {
+                console.log('🎉 Profil sauvegardé avec succès dans Supabase!');
+            } else {
+                console.log('⚠️ Échec de la sauvegarde:', saveResult.error);
+            }
+        } catch (error) {
+            console.error('❌ Erreur lors de la sauvegarde:', error);
+        }
+    } else {
+        console.log('⚠️ Fonction de sauvegarde Supabase non disponible');
+    }
 
     return userInfo;
 }
@@ -534,5 +550,38 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, {
     childList: true,
     subtree: true
+});
+
+// Gestion des messages du popup
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.action === 'extractProfile') {
+        // Extraire le profil immédiatement
+        getLinkedInUserInfo().then(() => {
+            sendResponse({ success: true, message: 'Profil extrait avec succès' });
+        }).catch(error => {
+            sendResponse({ success: false, error: error.message });
+        });
+        return true; // Indique une réponse asynchrone
+    }
+
+    if (request.action === 'getLastData') {
+        // Retourner les dernières données extraites
+        if (window.linkedInUserData) {
+            sendResponse({ success: true, data: window.linkedInUserData.data });
+        } else {
+            sendResponse({ success: false, message: 'Aucune donnée disponible' });
+        }
+    }
+
+    if (request.action === 'updateSupabaseKey') {
+        // Mettre à jour la clé Supabase
+        if (typeof supabase !== 'undefined' && supabase.key !== request.key) {
+            supabase.key = request.key;
+            supabase.headers['apikey'] = request.key;
+            supabase.headers['Authorization'] = `Bearer ${request.key}`;
+            console.log('🔑 Clé Supabase mise à jour');
+        }
+        sendResponse({ success: true });
+    }
 });
 

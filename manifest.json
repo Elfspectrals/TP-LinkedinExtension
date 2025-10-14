@@ -1,12 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Extension",
+  "name": "LinkedIn Profile Extractor",
   "version": "1.0.0",
-  "description": "Extension basique pour LinkedIn",
+  "description": "Extrait les profils LinkedIn et les sauvegarde dans Supabase",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "*://www.linkedin.com/*",
+    "*://elxsbvnkiemuzyeemefm.supabase.co/*"
+  ],
   "content_scripts": [
     {
       "matches": ["*://www.linkedin.com/*"],
-      "js": ["content.js"]
+      "js": ["supabase.js", "content.js"],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LinkedIn Profile Extractor"
+  }
 }

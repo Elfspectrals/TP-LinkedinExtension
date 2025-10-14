@@ -1,0 +1,26 @@
+{
+  "name": "linkedin-extension",
+  "version": "1.0.0",
+  "description": "Extension Chrome pour extraire les profils LinkedIn et les sauvegarder dans Supabase",
+  "main": "content.js",
+  "scripts": {
+    "build": "echo 'Extension prête à être chargée dans Chrome'",
+    "dev": "echo 'Mode développement - rechargez l'extension dans Chrome après chaque modification'"
+  },
+  "keywords": [
+    "linkedin",
+    "chrome-extension",
+    "supabase",
+    "scraping"
+  ],
+  "author": "Jérôme Neupert",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "."
+  }
+}
