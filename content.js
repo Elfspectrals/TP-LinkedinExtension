@@ -630,15 +630,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         }
     }
 
-    if (request.action === 'updateSupabaseKey') {
-        // Mettre à jour la clé Supabase
-        if (typeof supabase !== 'undefined' && supabase.key !== request.key) {
-            supabase.key = request.key;
-            supabase.headers['apikey'] = request.key;
-            supabase.headers['Authorization'] = `Bearer ${request.key}`;
-            console.log('🔑 Clé Supabase mise à jour');
-        }
-        sendResponse({ success: true });
-    }
 });
 

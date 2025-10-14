@@ -2,43 +2,13 @@
 document.addEventListener('DOMContentLoaded', function () {
     const extractBtn = document.getElementById('extractBtn');
     const viewDataBtn = document.getElementById('viewDataBtn');
-    const saveConfigBtn = document.getElementById('saveConfigBtn');
-    const supabaseKeyInput = document.getElementById('supabaseKey');
     const statusDiv = document.getElementById('status');
-
-    // Charger la configuration sauvegardée
-    chrome.storage.sync.get(['supabaseKey'], function (result) {
-        if (result.supabaseKey) {
-            supabaseKeyInput.value = result.supabaseKey;
-            updateStatus('Configuration Supabase chargée', 'success');
-        }
-    });
 
     // Fonction pour mettre à jour le statut
     function updateStatus(message, type = 'info') {
         statusDiv.textContent = message;
         statusDiv.className = `status ${type}`;
     }
-
-    // Sauvegarder la configuration Supabase
-    saveConfigBtn.addEventListener('click', function () {
-        const key = supabaseKeyInput.value.trim();
-        if (key) {
-            chrome.storage.sync.set({ supabaseKey: key }, function () {
-                updateStatus('Configuration sauvegardée!', 'success');
-
-                // Injecter la clé dans le content script
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        action: 'updateSupabaseKey',
-                        key: key
-                    });
-                });
-            });
-        } else {
-            updateStatus('Veuillez entrer une clé API valide', 'error');
-        }
-    });
 
     // Extraire le profil actuel
     extractBtn.addEventListener('click', function () {

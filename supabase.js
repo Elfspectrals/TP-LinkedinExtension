@@ -1,4 +1,5 @@
 // Configuration Supabase pour l'extension LinkedIn
+// ⚠️ REMPLACEZ CES VALEURS PAR LES VÔTRES !
 const SUPABASE_URL = 'https://elxsbvnkiemuzyeemefm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVseHNidm5raWVtdXp5ZWVtZWZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0MDE2MDYsImV4cCI6MjA3NTk3NzYwNn0.SvhLjVkla2WmA8pTjQIHzxPcODcdiTFFXHDl1Ohu9LU';
 

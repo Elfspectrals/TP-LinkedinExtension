@@ -4,62 +4,47 @@ Extension Chrome qui extrait automatiquement les profils LinkedIn et les sauvega
 
 ## 📋 Fonctionnalités
 
-- ✅ Extraction automatique des profils LinkedIn
-- ✅ Sauvegarde dans Supabase
-- ✅ Interface popup intuitive
-- ✅ Configuration facile de l'API Supabase
+- ✅ Extraction des profils LinkedIn (nom, poste, abonnés, relations, expériences, formations, compétences)
+- ✅ Sauvegarde automatique dans Supabase
+- ✅ Interface popup simple et intuitive
+- ✅ Extraction manuelle via bouton
 
-## 🚀 Installation
+## 🚀 Installation rapide
 
-### 1. Configuration Supabase
+### 1. Créer votre projet Supabase
 
-1. Allez sur votre [dashboard Supabase](https://supabase.com/dashboard/project/elxsbvnkiemuzyeemefm)
-2. Créez la table `linkedin_profiles` avec cette requête SQL :
-
-```sql
-CREATE TABLE linkedin_profiles (
-  id BIGSERIAL PRIMARY KEY,
-  nom_prenom TEXT,
-  poste_actuel TEXT,
-  nombre_abonnes TEXT,
-  nombre_relations TEXT,
-  experiences_professionnelles JSONB,
-  certifications_formations JSONB,
-  nombre_competences INTEGER,
-  url_profil TEXT,
-  extracted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-3. Récupérez votre clé API dans `Settings > API` (anon/public key)
+1. Allez sur [supabase.com](https://supabase.com) et créez un nouveau projet
+2. Dans l'éditeur SQL, copiez-collez le contenu du fichier `supabase-table.sql` et exécutez-le
+3. Récupérez votre **Project URL** et **anon key** dans `Settings > API`
 
 ### 2. Configuration de l'extension
 
 1. Ouvrez le fichier `supabase.js`
-2. Remplacez `VOTRE_ANON_KEY_ICI` par votre vraie clé API Supabase
+2. Remplacez ces valeurs par les vôtres :
+   ```javascript
+   const SUPABASE_URL = "https://your-project-id.supabase.co";
+   const SUPABASE_ANON_KEY = "your_supabase_anon_key_here";
+   ```
 
 ### 3. Installation dans Chrome
 
-1. Ouvrez Chrome et allez sur `chrome://extensions/`
-2. Activez le "Mode développeur" (en haut à droite)
-3. Cliquez sur "Charger l'extension non empaquetée"
-4. Sélectionnez le dossier de cette extension
-5. L'extension apparaît dans la barre d'outils Chrome
+1. Ouvrez Chrome → `chrome://extensions/`
+2. Activez le **"Mode développeur"** (toggle en haut à droite)
+3. Cliquez sur **"Charger l'extension non empaquetée"**
+4. Sélectionnez le dossier `TP-LinkedinExtension`
+5. ✅ L'extension apparaît dans votre barre d'outils !
 
 ## 🎯 Utilisation
 
-### Méthode automatique
+1. **Allez sur un profil LinkedIn** (n'importe lequel)
+2. **Cliquez sur l'icône de l'extension** dans la barre d'outils Chrome
+3. **Cliquez sur "💾 Extraire et sauvegarder"**
+4. ✅ **Les données sont automatiquement sauvegardées dans Supabase !**
 
-1. Allez sur n'importe quel profil LinkedIn
-2. L'extension extrait automatiquement les données après 3 secondes
-3. Les données sont sauvegardées dans Supabase
+### 👁️ Voir vos données
 
-### Méthode manuelle
-
-1. Cliquez sur l'icône de l'extension dans la barre d'outils
-2. Configurez votre clé API Supabase (une seule fois)
-3. Cliquez sur "Extraire le profil actuel"
-4. Visualisez les données avec "Voir les données extraites"
+- **Dans Supabase** : Allez dans `Table Editor` → `linkedin_profiles`
+- **Ou via l'extension** : Cliquez sur "👁️ Voir les données extraites"
 
 ## 📊 Données extraites
 
@@ -101,13 +86,28 @@ TP-LinkedinExtension/
 - Les logs d'extraction apparaissent dans la console
 - Vérifiez les erreurs dans l'onglet "Extensions" de Chrome
 
+## 🔧 Structure du projet
+
+```
+TP-LinkedinExtension/
+├── manifest.json          # Configuration de l'extension Chrome
+├── content.js             # Script d'extraction des profils LinkedIn
+├── supabase.js           # Client Supabase (⚠️ configurez vos clés ici)
+├── popup.html            # Interface utilisateur
+├── popup.js              # Logique du popup
+├── supabase-table.sql    # Script SQL pour créer la table
+└── README.md             # Ce fichier
+```
+
 ## 📝 Notes importantes
 
-- ⚠️ Respectez les conditions d'utilisation de LinkedIn
-- 🔒 Gardez votre clé API Supabase secrète
-- 🚀 L'extension fonctionne uniquement sur les pages de profil LinkedIn
-- 💾 Les données sont sauvegardées automatiquement dans Supabase
+- ⚠️ **Respectez les conditions d'utilisation de LinkedIn**
+- 🔒 **Ne partagez jamais votre clé API Supabase publiquement**
+- 🚀 **L'extension fonctionne uniquement sur les pages de profil LinkedIn**
+- 💾 **Sauvegarde manuelle uniquement** (cliquez sur le bouton pour sauvegarder)
 
-## 🎉 Prêt à utiliser !
+## 🎉 C'est parti !
 
-Votre extension LinkedIn est maintenant configurée et prête à extraire des profils !
+Votre extension LinkedIn est maintenant prête à extraire et sauvegarder des profils dans Supabase !
+
+**Bon scraping ! 🚀**
