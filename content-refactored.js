@@ -462,16 +462,36 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Création et injection du bouton de scraping dans la page
 function createScrapingButton() {
+    console.log('🔧 createScrapingButton() appelée');
+
     // Vérifier si le bouton existe déjà
     if (document.getElementById('linkedin-scraper-btn')) {
+        console.log('✅ Bouton déjà présent');
         return;
     }
 
-    // Trouver l'élément parent où injecter le bouton
-    const targetContainer = document.querySelector('.qCamYmQbgudFVzKuctSzgAikIqbmqYU.mt2');
+    // Essayer plusieurs sélecteurs pour trouver l'élément parent
+    const selectors = [
+        '.qCamYmQbgudFVzKuctSzgAikIqbmqYU.mt2',
+        '.pv-text-details__left-panel',
+        '.ph5.pb5',
+        '.pv-top-card',
+        'main section:first-child',
+        '.scaffold-layout__main section:first-child'
+    ];
+
+    let targetContainer = null;
+    for (const selector of selectors) {
+        targetContainer = document.querySelector(selector);
+        if (targetContainer) {
+            console.log('🎯 Conteneur trouvé avec le sélecteur:', selector);
+            break;
+        }
+    }
+
     if (!targetContainer) {
-        // Réessayer plus tard si l'élément n'est pas encore chargé
-        setTimeout(createScrapingButton, 1000);
+        console.log('⚠️ Aucun conteneur trouvé, nouvelle tentative dans 2 secondes...');
+        setTimeout(createScrapingButton, 2000);
         return;
     }
 
@@ -698,9 +718,11 @@ function createScrapingButton() {
 
     // Ajouter le bouton après l'élément de localisation
     targetContainer.appendChild(scrapingButton);
+    console.log('🎉 Bouton de scraping ajouté avec succès!');
 
     // Ajouter l'événement click
     scrapingButton.querySelector('.linkedin-scraper-button').addEventListener('click', openScrapingModal);
+    console.log('🔗 Event listener ajouté au bouton');
 }
 
 // Création de la modal de scraping
@@ -902,9 +924,21 @@ function updateModalStatus(message, type = 'info', showLoading = false) {
 // Plus besoin de les rendre globales
 
 // Initialiser le bouton de scraping
+console.log('🔄 Initialisation du bouton de scraping...');
 setTimeout(() => {
+    console.log('⏰ Tentative de création du bouton...');
     createScrapingButton();
-}, 2000);
+}, 3000);
+
+// Essayer aussi quand le DOM est complètement chargé
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(createScrapingButton, 1000);
+    });
+} else {
+    // DOM déjà chargé
+    setTimeout(createScrapingButton, 1000);
+}
 
 // Observer pour recréer le bouton si la page change
 const buttonObserver = new MutationObserver(() => {
@@ -920,7 +954,6 @@ buttonObserver.observe(document.body, {
 
 // Nettoyage lors du déchargement de la page
 window.addEventListener('beforeunload', () => {
-    observer.disconnect();
     buttonObserver.disconnect();
     linkedInExtractor.clearCache();
 });
